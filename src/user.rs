@@ -4,168 +4,88 @@ use std::hash::{Hash, Hasher};
 
 #[derive(Debug)]
 pub struct User {
-    birthday: Date,
-    name: String,
+    id: u64,
+    age: u8,
+    death_reasons: Vec<&'static str>,
 }
 
 impl User {
-    /// Return a new empty user.
-    ///
-    /// # Example
-    /// ```
-    /// use death::user::User;
-    /// use death::date::Date;
-    ///
-    /// let user = User::new();
-    ///
-    /// assert_eq!(user.birthday(), Date::build(1970, 1, 1).unwrap());
-    /// assert_eq!(user.name(), &String::from("None"));
-    /// ```
-    pub fn new() -> User {
+    /// Returns a new user.
+    pub fn new(id: u64, age: u8, death_reasons: Vec<&'static str>) -> User {
         User {
-            birthday: Date::build(1970, 1, 1).unwrap(),
-            name: String::from("None")
+            id,
+            age,
+            death_reasons,
         }
     }
     
-    /// Set a birthday for user.
-    ///
-    /// # Example
-    /// ```
-    /// use death::user::User;
-    /// use death::date::Date;
-    ///
-    /// let mut user = User::new();
-    /// let birthday = Date::build(1990, 11, 12).unwrap();
-    /// user.set_birthday(birthday);
-    ///
-    /// assert_eq!(user.birthday(), birthday);
-    /// ```
-    pub fn set_birthday(&mut self, birthday: Date) {
-        self.birthday = birthday;
-    }
-
-    /// Set a name for user.
-    ///
-    /// # Example
-    /// ```
-    /// use death::user::User;
-    ///
-    /// let mut user = User::new();
-    /// let name = String::from("John Doe");
-    /// user.set_name(name);
-    ///
-    /// assert_eq!(user.name(), &String::from("John Doe"));
-    /// ```
-    pub fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-
-    /// Returns user's years old
-    ///
-    /// # Example
-    /// ```
-    /// use death::user::User;
-    /// use death::date::Date;
-    ///
-    /// let mut user = User::new();
-    /// let birthday = Date::build(1990, 11, 12).unwrap();
-    /// user.set_birthday(birthday);
-    ///
-    /// assert_eq!(user.years_old(), birthday.years_from(Date::today()));
-    /// ```
-    pub fn years_old(&self) -> u16 {
-        self.birthday().years_from(Date::today())
-    }
-
-    /// Returns user's birthday
-    ///
-    /// # Example
-    /// ```
-    /// use death::user::User;
-    /// use death::date::Date;
-    ///
-    /// let user = User::new();
-    /// 
-    /// assert_eq!(user.birthday(), Date::build(1970, 1, 1).unwrap());
-    /// ```
-    pub fn birthday(&self) -> Date {
-        self.birthday
-    }
-
-    /// Returns user's name
-    ///
-    /// # Example
-    /// ```
-    /// use death::user::User;
-    ///
-    /// let user = User::new();
-    /// 
-    /// assert_eq!(user.name(), &String::from("None"));
-    /// ```
-    pub fn name(&self) -> &String {
-        &self.name
-    }
-
-    fn calculate_hash(&self) -> u16 {
+    /// Set an id from string's hash.
+    pub fn get_id_from_string(string: &String) -> u64 {
         let mut s = DefaultHasher::new();
-        self.name.hash(&mut s);
-        s.finish() as u16
+        string.hash(&mut s);
+        s.finish()
     }
 
-    fn get_years_left(&self) -> u16 {
-        let max_left = date::MAX_YEARS_OLD - self.years_old();
-        self.calculate_hash() % max_left + 1
+    /// Set an age from birthday.
+    pub fn set_age_from_birthday(&mut self, birthday: Date) {
+        self.age = birthday.years_from(Date::today()) as u8;
+    }
+
+    fn get_years_left(&self) -> u8 {
+        let max_age: u64 = (date::MAX_YEARS_OLD - self.age as u16) as u64;
+        (self.id % max_age + 1) as u8
     }
 
     /// Returns user's predicted danger
-    pub fn get_danger(&self) -> &'static str {
-        let dangers = vec![
-            "cars",
-            "illness",
-            "height",
-            "darkness",
-            "fire",
-            "water",
-            "nature",
-            "building",
-            "electricity",
-            "explosions",
-            "food",
-            "animals",
-            "temperature",
-            "weapons",
-        ];
-        dangers[(self.calculate_hash() % (dangers.len() as u16)) as usize]
+    pub fn get_death_reason(&self) -> &'static str {
+        self.death_reasons[
+            (self.id % (self.death_reasons.len() as u64)) as usize
+        ]
     }
 
     /// Returns calculated death date of current user.
     pub fn get_death_date(&self) -> Date {
-        let hash = self.calculate_hash();
-
-        let year = Date::today().year() + self.get_years_left();
-        let month = hash % 12 + 1;
+        let year = Date::today().year() + self.get_years_left() as u16;
+        let month = (self.id % 12 + 1) as u16;
         let day = 1;
         let date0 = Date::build(year, month, day).unwrap();
-        let day = hash % date0.get_max_day() + 1;
+        let day = (self.id % date0.get_max_day() as u64 + 1) as u16;
         let date = Date::build(year, month, day).unwrap();
 
         date
     }
 }
 
-mod tests {
-    #[test]
-    fn calculate_hash() {
-        use super::*;
-        
-        let user1 = User::new();
-        let user2 = User::new();
-        let mut user3 = User::new();
+mod tests { }
 
-        user3.set_name(String::from("null"));
 
-        assert_eq!(user1.calculate_hash(), user2.calculate_hash());
-        assert_ne!(user1.calculate_hash(), user3.calculate_hash());
+/// Returns death reasons from file. If `file_path` is None, a default death
+/// reasons returned.
+///
+/// Errors
+///
+/// This function will return an error if path does not exist or user does not
+/// have permission to read the file
+pub fn load_custom_death_reasons(file_path: Option<String>) -> Vec<&'static str> {
+    match file_path {
+        Some(_file_path) => {
+            // TODO: read the file
+
+            /* let contents = fs::read_to_string(file_path)
+                .expect("Should have been able to read the file");
+
+            for line in contents.split("\n") {
+
+            }
+            println!("With text:\n{contents}"); */
+
+            vec![]
+        },
+        // TODO: embed in executable https://doc.rust-lang.org/std/macro.include_bytes.html
+        None => vec![
+            "cars", "illness", "height", "darkness", "fire", "water", "nature",
+            "building", "electricity", "explosions", "food", "animals",
+            "temperature", "weapons"
+        ]
     }
 }
