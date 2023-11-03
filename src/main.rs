@@ -3,7 +3,7 @@ use std::process;
 
 use death::cli;
 use death::date::{Date, ParseError};
-use death::user::{self, User};
+use death::user::User;
 
 fn input() -> String {
     let mut s = String::new();
@@ -13,13 +13,14 @@ fn input() -> String {
 
 fn main() {
     let args = cli::parse();
+    ask_birthday(&args, true);
 
     let name = ask_name(&args);
-    let age = ask_birthday(&args);
+    let age = ask_birthday(&args, false);
 
-    let death_reasons = user::load_custom_death_reasons(None);
+    let death_reasons = death::read_death_reasons(&String::from(""));
 
-    let user = User::new(User::get_id_from_string(&name), age, death_reasons);
+    let user = User::new(User::get_id_from_string(&name), age, Some(death_reasons));
 
     println!("");
 
@@ -55,19 +56,13 @@ fn parse_birthday(string: &String) -> Result<Date, String> {
             return Err(String::from(msg));
         }
     };
-    if today.year() < birthday.year() {
-        return Err(String::from("Your birthday can not be in the future."));
-    } else if today.year() == birthday.year() &&
-    today.month() < birthday.month() {
-        return Err(String::from("Your birthday can not be in the future."));
-    } else if today.month() == birthday.month() &&
-    today.day() < birthday.day() {
+    if today < birthday {
         return Err(String::from("Your birthday can not be in the future."));
     }
     Ok(birthday)
 }
 
-fn ask_birthday(args: &cli::Cli) -> u8 {
+fn ask_birthday(args: &cli::Cli, test: bool) -> u8 {
     let birthday;
     if let Some(birthday_string) = args.birthday.as_deref() {
         birthday = match parse_birthday(&birthday_string.to_string()) {
@@ -77,6 +72,9 @@ fn ask_birthday(args: &cli::Cli) -> u8 {
                 process::exit(1);
             }
         };
+        if test {
+            return birthday.years_from(Date::today()) as u8;
+        }
     } else {
         loop {
             print!("Enter your birthday (DD/MM/YYYY): ");
@@ -96,6 +94,6 @@ fn ask_birthday(args: &cli::Cli) -> u8 {
 
 fn predict(user: &User) {
     println!("DATE OF DEATH");
-    println!("{}", user.get_death_date().get_string());
+    println!("{}", user.get_death_date());
     println!("Be aware of: {}", user.get_death_reason());
 }
