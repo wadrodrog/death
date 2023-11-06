@@ -27,7 +27,7 @@ pub struct Date {
 pub const MAX_YEARS_OLD: u16 = 100;
 
 impl Date {
-    /// Makes a new `Date` from the today's date.
+    /// Creates a new [`Date`] object from today's date.
     pub fn today() -> Date {
         let dt = Local::now().date_naive();
         Date {
@@ -37,11 +37,11 @@ impl Date {
         }
     }
 
-    /// Makes `Date` from a year, a month and a day.
+    /// Creates a new [`Date`] object from year, month and day.
     ///
     /// # Errors
     ///
-    /// Returns date::ParseError if values are invalid
+    /// Returns [`crate::date::ParseError`] if values are invalid
     ///
     /// # Example
     ///
@@ -62,24 +62,19 @@ impl Date {
         if month < 1 || month > 12 {
             return Err(ParseError::InvalidMonth);
         }
-
-        let mut date = Date { year, month, day: 1 };
         
-        if day < 1 || day > date.get_max_day() {
+        if day < 1 || day > Date::max_day_of(year, month) {
             return Err(ParseError::InvalidDay);
         }
 
-        date.day = day;
-        
-        Ok(date)
+        Ok(Date { year, month, day })
     }
 
-    /// Parses `Date` from a string.
+    /// Creates a new [`Date`] object from string.
     ///
     /// # Errors
     ///
-    /// Returns date::ParseError if the string contains invalid date or date in the
-    /// future.
+    /// Returns [`crate::date::ParseError`] if string contains invalid date.
     ///
     /// # Example
     ///
@@ -102,7 +97,7 @@ impl Date {
             }
         }
         
-        // Split into the parts
+        // Split into parts
         let parts;
 
         if let Some(value) = sep {
@@ -129,7 +124,7 @@ impl Date {
         Date::build(numbers[2], numbers[1] as u8, numbers[0] as u8)
     }
 
-    /// Returns `true` if the year is the leap year.
+    /// Returns `true` if the year is leap.
     ///
     /// # Example
     /// ```
@@ -144,22 +139,13 @@ impl Date {
         year % 4 == 0 && year % 100 != 0 || year % 400 == 0
     }
 
-    /// Returns `true` if the current year is the leap year.
-    ///
-    /// # Example
-    /// ```
-    /// use death::date::Date;
-    ///
-    /// assert!(Date::build(2016, 3, 7).unwrap().leap_year());
-    /// assert!(!Date::build(2015, 3, 7).unwrap().leap_year());
-    /// assert!(Date::build(2000, 3, 7).unwrap().leap_year());
-    /// assert!(!Date::build(1900, 3, 7).unwrap().leap_year());
-    /// ````
+    /// Returns `true` if the year of current date is leap.
+    /// (see [`Date::is_leap_year`])
     pub fn leap_year(&self) -> bool {
         Date::is_leap_year(self.year)
     }
 
-    /// Returns the max day of month in year.
+    /// Returns max day of month in the year.
     ///
     /// # Example
     /// ```
@@ -186,17 +172,8 @@ impl Date {
         30
     }
 
-    /// Returns the max day of current month.
-    ///
-    /// # Example
-    /// ```
-    /// use death::date::Date;
-    ///
-    /// assert_eq!(Date::build(2015, 3, 7).unwrap().get_max_day(), 31);
-    /// assert_eq!(Date::build(2015, 4, 7).unwrap().get_max_day(), 30);
-    /// assert_eq!(Date::build(2015, 2, 7).unwrap().get_max_day(), 28);
-    /// assert_eq!(Date::build(2016, 2, 7).unwrap().get_max_day(), 29);
-    /// ```
+    /// Returns max day of month of current date.
+    /// (see [`Date::get_max_day`])
     pub fn get_max_day(&self) -> u8 {
         Date::max_day_of(self.year, self.month)
     }
@@ -207,7 +184,7 @@ impl Date {
     /// ```
     /// use death::date::Date;
     ///
-    /// let date = Date::build(2012, 12, 12).unwrap();
+    /// let date = Date::build(2013, 12, 11).unwrap();
     ///
     /// assert_eq!(date.get_month_name(), String::from("December"));
     /// ```
@@ -219,12 +196,11 @@ impl Date {
         months[(self.month - 1) as usize]
     }
 
-    /// Returns the copy of `Date` with month number increased.
+    /// Returns copy of [`Date`] object with month number increased.
     ///
-    /// If the day was greater than next month's max day, it will be decreased
-    /// to max day.
+    /// If day was greater than next month's max day, it will be set to max day.
     ///
-    /// If month was `12`, the year will be increased and month set to `1`.
+    /// If month was `12`, year will be increased and month set to `1`.
     ///
     /// # Example
     /// ```
@@ -260,11 +236,11 @@ impl Date {
         date
     }
 
-    /// Returns the copy of `Date` with day number increased.
+    /// Returns copy of [`Date`] object with day number increased.
     ///
-    /// If the day was last in current month, month will be increased and day
-    /// set to `1`. If month was `12`, the year will be increased with month
-    /// and day set to `1`.
+    /// If day was last in current month, month will be increased and day
+    /// set to `1`. If month was `12`, year will be increased, month and day
+    /// set to `1`.
     ///
     /// # Example
     /// ```
@@ -310,6 +286,7 @@ impl Date {
     /// Returns a number of full years from the other date.
     ///
     /// # Example
+    ///
     /// ```
     /// use death::date::Date;
     ///
@@ -333,37 +310,40 @@ impl Date {
         diff
     }
 
-    /// Returns the year number.
+    /// Returns year value.
     ///
     /// # Example
+    ///
     /// ```
     /// use death::date::Date;
     ///
-    /// assert_eq!(Date::build(2015, 3, 7).unwrap().year(), 2015);
+    /// assert_eq!(Date::build(2015, 1, 7).unwrap().year(), 2015);
     /// ```
     pub fn year(&self) -> u16 {
         self.year
     }
 
-    /// Returns the month number from 1 to 12.
+    /// Returns month value from 1 to 12.
     ///
     /// # Example
+    ///
     /// ```
     /// use death::date::Date;
     ///
-    /// assert_eq!(Date::build(2015, 3, 7).unwrap().month(), 3);
+    /// assert_eq!(Date::build(2015, 1, 7).unwrap().month(), 1);
     /// ```
     pub fn month(&self) -> u8 {
         self.month
     }
 
-    /// Returns the day number.
+    /// Returns day value.
     ///
     /// # Example
+    ///
     /// ```
     /// use death::date::Date;
     ///
-    /// assert_eq!(Date::build(2015, 3, 7).unwrap().day(), 7);
+    /// assert_eq!(Date::build(2015, 1, 7).unwrap().day(), 7);
     /// ```
     pub fn day(&self) -> u8 {
         self.day

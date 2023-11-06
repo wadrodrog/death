@@ -13,16 +13,16 @@ pub struct User {
 impl User {
     /// Returns a new user.
     pub fn new(id: u64, age: u8, death_reasons: Vec<String>) -> User {
-        User { id, age, death_reasons, }
+        User { id, age, death_reasons }
     }
 
     /// Returns a new user from command-line arguments.
     ///
-    /// If argument was empty, default values will be used.
+    /// If some argument was empty, default value will be used.
     ///
     /// # Errors
     ///
-    /// If some argument was invalid, program closes immediately.
+    /// If some argument is invalid, program will close immediately.
     pub fn from(args: &cli::Cli) -> User {
         let empty = String::from("01/01/1970");
         let birthday_string = match &args.birthday {
@@ -38,7 +38,9 @@ impl User {
             }
         };
 
-        let death_reasons = match crate::read_death_reasons(&args.death_reasons) {
+        let death_reasons = match crate::read_death_reasons(
+            &args.death_reasons
+        ) {
             Ok(v) => v,
             Err(e) => {
                 cli::print_error(e, 1);
