@@ -6,22 +6,13 @@ use std::hash::{Hash, Hasher};
 pub struct User {
     id: u64,
     age: u8,
-    death_reasons: Vec<&'static str>,
+    death_reasons: Vec<String>,
 }
 
 impl User {
     /// Returns a new user.
-    pub fn new(
-        id: u64, age: u8, death_reasons: Option<Vec<&'static str>>
-    ) -> User {
-        User {
-            id,
-            age,
-            death_reasons: match death_reasons {
-                Some(v) => v,
-                None => crate::DEFAULT_DEATH_REASONS.to_vec(),
-            },
-        }
+    pub fn new(id: u64, age: u8, death_reasons: Vec<String>) -> User {
+        User { id, age, death_reasons, }
     }
     
     /// Get an id from string's hash.
@@ -37,8 +28,8 @@ impl User {
     }
 
     /// Returns user's predicted death reason.
-    pub fn get_death_reason(&self) -> &'static str {
-        self.death_reasons[
+    pub fn get_death_reason(&self) -> &String {
+        &self.death_reasons[
             (self.id % (self.death_reasons.len() as u64)) as usize
         ]
     }

@@ -1,26 +1,90 @@
+use std::fs;
+use std::path::PathBuf;
+use std::io::{Error, ErrorKind};
+
 pub mod date;
 pub mod user;
 pub mod cli;
 
-pub const DEFAULT_DEATH_REASONS: &'static [&'static str] = &[
-    "cars", "illness", "height", "darkness", "fire", "water", "nature",
-    "building", "electricity", "explosions", "food", "animals", "temperature",
-    "weapons"];
+/// Returns default death reasons.
+pub fn default_death_reasons() -> Vec<String> {
+    vec![
+        "cars".to_string(), "illness".to_string(), "height".to_string(),
+        "darkness".to_string(), "fire".to_string(), "water".to_string(),
+        "nature".to_string(), "building".to_string(),
+        "electricity".to_string(), "explosions".to_string(),
+        "food".to_string(), "animals".to_string(), "temperature".to_string(),
+        "weapons".to_string()
+    ]
+}
 
 /// Returns death reasons from file.
 ///
+/// If None was passed, a default death reasons returned.
+///
 /// # Errors
 ///
-/// Returns an error if the file was failed to read
-pub fn read_death_reasons(_file_path: &String) -> Vec<&'static str> {
-    // TODO: read the file
+/// Returns std::io::Error if cannot read the file.
+pub fn read_death_reasons(file_path: &Option<PathBuf>)
+-> Result<Vec<String>, std::io::Error> {
+    let file_path = match file_path {
+        Some(x) => x,
+        None => return Ok(default_death_reasons()),
+    };
 
-    /* let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
+    let contents = fs::read_to_string(file_path)?;
 
-    for line in contents.split("\n") {
+    let mut res = vec![];
 
+    for line in contents.lines() {
+        let line = line.trim().to_string();
+        if line.len() > 0 {
+            res.push(line);
+        }
     }
-    println!("With text:\n{contents}"); */
-    DEFAULT_DEATH_REASONS.to_vec()
+
+    if res.len() == 0 {
+        Err(Error::new(ErrorKind::Other, "File is empty"))
+    } else {
+        Ok(res)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::{Error, ErrorKind};
+
+    #[test]
+    fn read_file() {
+        let reference = vec![
+            "sample1".to_string(), "sample2".to_string(),
+            "sample3;".to_string(), "123".to_string(), "!@#$%^&*()".to_string(),
+            "``".to_string(), "Sample With Spaces".to_string(),
+            "It   Should  Trim Spaces".to_string(),
+        ];
+
+        let res = read_death_reasons(&Some(PathBuf::from("tests/read_file.txt")))
+            .unwrap();
+
+        assert_eq!(res, reference);
+
+        let error_ref = Error::new(ErrorKind::Other, "File is empty");
+
+        match read_death_reasons(&Some(PathBuf::from("tests/spaces.txt"))) {
+            Ok(_) => panic!(),
+            Err(e) => {
+                assert_eq!(e.kind(), error_ref.kind());
+                assert_eq!(e.to_string(), error_ref.to_string());
+            },
+        }
+
+        match read_death_reasons(&Some(PathBuf::from("tests/empty.txt"))) {
+            Ok(_) => panic!(),
+            Err(e) => {
+                assert_eq!(e.kind(), error_ref.kind());
+                assert_eq!(e.to_string(), error_ref.to_string());
+            }
+        }
+    }
 }

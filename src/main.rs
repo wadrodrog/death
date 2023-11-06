@@ -18,9 +18,15 @@ fn main() {
     let name = ask_name(&args);
     let age = ask_birthday(&args, false);
 
-    let death_reasons = death::read_death_reasons(&String::from(""));
+    let death_reasons = match death::read_death_reasons(&args.death_reasons) {
+        Ok(v) => v,
+        Err(e) => {
+            println!("error: {}", e);
+            process::exit(1);
+        },
+    };
 
-    let user = User::new(User::get_id_from_string(&name), age, Some(death_reasons));
+    let user = User::new(User::get_id_from_string(&name), age, death_reasons);
 
     println!("");
 

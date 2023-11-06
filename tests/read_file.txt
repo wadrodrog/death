@@ -1,0 +1,18 @@
+sample1
+sample2
+sample3;
+ 
+ 
+123 
+   
+    
+
+
+!@#$%^&*()
+``
+
+Sample With Spaces
+
+     It   Should  Trim Spaces      
+
+
