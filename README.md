@@ -32,6 +32,7 @@ program.
 
 ```
 $ git clone https://codeberg.org/wadrodrog/death.git
+$ cd death
 $ cargo build
 $ ./target/debug/death
 ```
