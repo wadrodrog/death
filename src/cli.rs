@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::{fmt, process};
 use std::io::{self, Write};
 
-use crate::date::{Date, ParseError};
+use crate::date::{self, Date, ParseError};
 
 use clap::Parser;
 use colored::*;
@@ -82,6 +82,11 @@ pub fn parse_birthday(string: &String) -> Result<Date, String> {
             return Err(String::from(msg));
         }
     };
+    if birthday.years_from(Date::today()) >= date::MAX_YEARS_OLD {
+        return Err(
+            String::from("Your birthday cannot be so much in the past.")
+        );
+    }
     if today < birthday {
         return Err(String::from("Your birthday cannot be in the future."));
     }
