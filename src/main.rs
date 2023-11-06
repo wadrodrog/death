@@ -12,17 +12,23 @@ fn main() {
 
     let mut user = User::from(&args);
 
+    let mut asked = false;
+
     if args.name == None {
         let name = cli::ask_name();
         user.set_id(User::get_id_from_string(&name));
+        asked = true;
     }
 
     if args.birthday == None {
         let age = cli::ask_birthday();
         user.set_age(age);
+        asked = true;
     }
 
-    println!("");
+    if asked {
+        println!("");
+    }
 
     predict(&user);
 }
