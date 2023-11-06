@@ -1,7 +1,12 @@
 [package]
 name = "death"
-version = "0.2.0-alpha"
+version = "0.2.0"
+authors = ["wadrodrog"]
 edition = "2021"
+description = "A program that predicts your death date"
+readme = "README.md"
+repository = "https://codeberg.org/wadrodrog/death"
+license-file = "LICENSE"
 
 [dependencies]
 chrono = "0.4.31"
