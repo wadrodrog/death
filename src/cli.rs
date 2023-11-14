@@ -22,6 +22,10 @@ pub struct Cli {
     /// Custom death reasons file
     #[arg(short, long, value_name = "FILE")]
     pub death_reasons: Option<PathBuf>,
+
+    /// Use linear formula to calculate the date
+    #[arg(short, long)]
+    pub linear: Option<bool>,
 }
 
 /// Parse command-line arguments.
@@ -82,7 +86,7 @@ pub fn parse_birthday(string: &String) -> Result<Date, String> {
             return Err(String::from(msg));
         }
     };
-    if birthday.years_from(Date::today()) >= date::MAX_YEARS_OLD {
+    if birthday.years_from(Date::today()) >= date::MAX_AGE {
         return Err(
             String::from("Your birthday cannot be so much in the past.")
         );

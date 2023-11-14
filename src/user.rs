@@ -72,9 +72,28 @@ impl User {
         s.finish()
     }
 
-    fn get_years_left(&self) -> u8 {
-        let max_age: u64 = (date::MAX_YEARS_OLD - self.age as u16) as u64;
-        (self.id % max_age + 1) as u8
+    fn get_years_left(&self, linear: bool) -> u8 {
+        if linear {
+            let max_age: u64 = (date::MAX_AGE - self.age as u16) as u64;
+            return (self.id % max_age + 1) as u8;
+        }
+
+        // Returns smaller values more often than larger values
+
+        // Max y
+        let max_age: f64 = (date::MAX_AGE - self.age as u16) as f64;
+
+        // Stretch the graph horizontally to make the result more accurate
+        let k: f64 = 100.0;
+
+        // base^0=1, base^x_max=max_age
+        let base: f64 = max_age.powf(1.0 / (max_age * k));
+
+        // From 0 to max_age * k - 1
+        let x: f64 = (self.id % (max_age * k) as u64) as f64;
+
+        // f(x)=a^x
+        base.powf(x) as u8
     }
 
     /// Returns user's predicted death reason.
@@ -85,8 +104,8 @@ impl User {
     }
 
     /// Returns calculated death date of current user.
-    pub fn get_death_date(&self) -> Date {
-        let year = Date::today().year() + self.get_years_left() as u16;
+    pub fn get_death_date(&self, linear: bool) -> Date {
+        let year = Date::today().year() + self.get_years_left(linear) as u16;
         let month = (self.id % 12 + 1) as u8;
         let day = 1;
         let date0 = Date::build(year, month, day).unwrap();

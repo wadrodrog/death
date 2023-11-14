@@ -1,9 +1,9 @@
 use death::cli;
 use death::user::User;
 
-fn predict(user: &User) {
+fn predict(user: &User, linear: bool) {
     println!("DATE OF DEATH");
-    println!("{}", user.get_death_date());
+    println!("{}", user.get_death_date(linear));
     println!("Be aware of: {}", user.get_death_reason());
 }
 
@@ -30,5 +30,7 @@ fn main() {
         println!("");
     }
 
-    predict(&user);
+    let linear = args.linear.unwrap_or(false);
+
+    predict(&user, linear);
 }

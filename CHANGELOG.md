@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### New death date formula
+
+- Death date is now calculated using an exponential function instead of a
+linear function. Smaller values will return more often than larger values.
+- Pass `--linear true` option to use old linear formula.
+
 ## [0.2.0] - 2023-11-06
 
 ### Command-line arguments

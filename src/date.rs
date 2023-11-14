@@ -24,7 +24,7 @@ pub struct Date {
     day: u8,
 }
 
-pub const MAX_YEARS_OLD: u16 = 100;
+pub const MAX_AGE: u16 = 100;
 
 impl Date {
     /// Creates a new [`Date`] object from today's date.
