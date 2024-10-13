@@ -4,17 +4,6 @@ A program that predicts your death date (Learning project)
 
 ![Demonstration of CLI death](death.png)
 
-## Installation
-
-Download an executable from
-[Releases page](https://codeberg.org/wadrodrog/death/releases)
-
-If you're on Linux, you need to allow execution:
-
-```shell
-$ chmod +x death
-```
-
 ## Usage
 
 ### As program
@@ -40,8 +29,8 @@ Add dependency to `Cargo.toml`:
 
 ```toml
 [dependencies]
-death = { git = "https://codeberg.org/wadrodrog/death.git" }  # latest
-death = { git = "https://codeberg.org/wadrodrog/death.git", tag = "0.2.0" }  # from tag
+death = { git = "https://github.com/wadrodrog/death.git" }  # latest
+death = { git = "https://github.com/wadrodrog/death.git", tag = "0.2.0" }  # from tag
 ```
 
 `src/main.rs`:
@@ -68,7 +57,7 @@ You need [Cargo](https://doc.rust-lang.org/cargo/index.html) to build this
 program.
 
 ```shell
-$ git clone https://codeberg.org/wadrodrog/death.git
+$ git clone https://github.com/wadrodrog/death.git
 $ cd death
 $ cargo build
 $ ./target/debug/death
